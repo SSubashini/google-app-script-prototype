@@ -1,0 +1,91 @@
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.js">
+    </script>
+  </head>
+  
+  <body>        
+    <div id="wrap">
+      <div class="container">
+        <div class="page-header">
+          
+          <h2 class="title">Summit Web Application Prototype</h2>
+          
+          <small>Enter a URL below and hit the Fetch Report! button.</small>       
+          <div class="input-append">
+            <input id="URL" type="text">
+            <button type="button" onclick='loadURL();' id="go">Fetch Report!</button>         
+          </div>
+          
+        </div>
+        <div class="loading">
+            <textarea rows="25" cols="50" id="jsonFromServer">
+                Response from server goes here.
+            </textarea>
+            <input id="createSpreadSheetId" type="text">
+            <input id="fillSheetWithDataStatus" type="text" value="">
+        </div>
+        <div class="webpage"></div>
+        
+      </div>
+    </div>
+    
+    <script>
+      var glbJsonData;
+      $("#URL").keyup(function(e){
+        if(e.keyCode == 13){
+          loadURL();
+        }
+      });
+ 
+      function createSpreadSheetOnSuccess(spreadSheetId) {
+          $("#createSpreadSheetId").val(spreadSheetId);
+          google.script.run.withSuccessHandler(fillSheetWithDataClient($("#createSpreadSheetId").val(), glbJsonData)).createAndSendSpreadSheet();
+      }
+ 
+      
+      function fillSheetWithDataOnSuccess(sheetUrl) {
+          $("#fillSheetWithDataStatus").val("Success");
+          alert("Successfully created spreadSheet with URL: " + sheetUrl);
+      }
+ 
+      function fillSheetWithDataClient(sheetId, jsonData){
+            console.log("Before calling fill data : " + jsonData.tableSchema[0].tableName);
+            console.log("Columns: " + jsonData.tableSchema[0].columns);
+            for (var i = 0; i<jsonData.tableSet[0].rows.length; i++) {
+                console.log("Rows: " + jsonData.tableSet[0].rows[i].row);
+            };
+            google.script.run.withSuccessHandler(fillSheetWithDataOnSuccess).fillSheetWithData(sheetId, jsonData);
+      }
+      
+      
+      function onSuccess() {
+          google.script.run.withSuccessHandler(createSpreadSheetOnSuccess).createAndSendSpreadSheet();
+      }      
+      
+      function loadURL() {
+          $("#URL").val("https://ne1-devsummitbe-002.ysm.pool.ne1.yahoo.com:9999/summit/196767AdcenterImpressionShare.json");
+          var url = $("#URL").val();
+          $.getJSON( "https://ne1-devsummitbe-002.ysm.pool.ne1.yahoo.com:9999/summit/196767AdcenterImpressionShare.json", function( jsonData ) {
+            $("#jsonFromServer").val(jsonData);
+            glbJsonData = jsonData;
+            //console.log("Extracting data from table: " + glbJsonData.tableSchema[0].tableName);
+            //console.log("Columns: " + glbJsonData.tableSchema[0].columns);
+            //for (var i = 0; i<glbJsonData.tableSet[0].rows.length; i++) {
+            //    console.log("Rows: " + glbJsonData.tableSet[0].rows[i].row);
+            //};
+          });
+          // google.script.run.withSuccessHandler(onSuccess).getJson($("#jsonFromServer").val());
+          google.script.run.withSuccessHandler(onSuccess).getJson(glbJsonData);
+          /*
+          $.getJSON( "https://ne1-devsummitbe-002.ysm.pool.ne1.yahoo.com:9999/summit/196767AdcenterImpressionShare.json", function( jsonData ) {
+            $("#jsonFromServer").val(jsonData);
+            console.log("Extracting data from table: " + jsonData.tableSchema[0].tableName);
+          }); 
+          */
+      }
+      
+    </script>
+    
+  </body>  
+</html>

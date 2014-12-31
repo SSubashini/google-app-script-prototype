@@ -1,0 +1,39 @@
+<html>
+<head>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script>
+<? var jsonString = ""; ?>
+
+$('document').ready(function(){
+  google.script.run.withSuccessHandler(fetchJsonFromServer);
+});
+
+function fetchJsonFromServer() {
+    jsonString = UrlFetchApp.fetch("http://www.google.com/");
+    Logger.log(jsonString.getContentText());
+
+    /*
+    $.getJSON( "https://ne1-devsummitbe-002.ysm.pool.ne1.yahoo.com:9999/summit/196767AdcenterImpressionShare.json", 
+        function( jsonData ) {
+            Logger.log("Extracting data from table: " + jsonData.tableSchema[0].tableName);
+            jsonString = jsonData;
+    });
+    */
+}
+
+</script>
+</head>
+
+<? createSpreadsheet(); ?>
+<? var data = getData(); ?>
+<table>
+  <? for (var i = 0; i < data.length; i++) { ?>
+    <tr>
+      <? for (var j = 0; j < data[i].length; j++) { ?>
+        <td><?= data[i][j] ?></td>
+      <? } ?>
+    </tr>
+  <? } ?>
+</table>
+<?= jsonString ?>
+</html>
